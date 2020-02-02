@@ -91,7 +91,7 @@ public interface ErrorDecoder {
     public Exception decode(String methodKey, Response response) {
       FeignException exception = errorStatus(methodKey, response);
       Date retryAfter = retryAfterDecoder.apply(firstOrNull(response.headers(), RETRY_AFTER));
-      if (retryAfter != null) {
+      if (retryAfter != null && !response.request().isStream()) {
         return new RetryableException(
             response.status(),
             exception.getMessage(),

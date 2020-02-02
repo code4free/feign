@@ -243,12 +243,20 @@ public class FeignException extends RuntimeException {
   }
 
   static FeignException errorExecuting(Request request, IOException cause) {
-    return new RetryableException(
-        -1,
-        format("%s executing %s %s", cause.getMessage(), request.httpMethod(), request.url()),
-        request.httpMethod(),
-        cause,
-        null, request);
+    if (!request.isStream()) {
+      return new RetryableException(
+          -1,
+          format("%s executing %s %s", cause.getMessage(), request.httpMethod(), request.url()),
+          request.httpMethod(),
+          cause,
+          null, request);
+    } else {
+      return new FeignException(
+          -1,
+          format("%s executing %s %s", cause.getMessage(), request.httpMethod(), request.url()),
+          request,
+          cause);
+    }
   }
 
   public static class FeignClientException extends FeignException {

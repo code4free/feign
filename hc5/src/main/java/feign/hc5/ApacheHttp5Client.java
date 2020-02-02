@@ -22,6 +22,7 @@ import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.apache.hc.core5.net.URIBuilder;
@@ -129,15 +130,17 @@ public final class ApacheHttp5Client implements Client {
     // final Body requestBody = request.requestBody();
     byte[] data = request.body();
     if (data != null) {
-      HttpEntity entity;
-      if (request.isBinary()) {
-        entity = new ByteArrayEntity(data, null);
-      } else {
-        final ContentType contentType = getContentType(request);
-        entity = new StringEntity(new String(data), contentType);
-      }
+	    HttpEntity entity;
+	    if (request.isBinary()) {
+		    entity = new ByteArrayEntity(data, null);
+	    } else {
+		    final ContentType contentType = getContentType(request);
+		    entity = new StringEntity(new String(data), contentType);
+	    }
 
-      requestBuilder.setEntity(entity);
+	    requestBuilder.setEntity(entity);
+    } else if (request.isStream()) {
+      requestBuilder.setEntity(new InputStreamEntity(request.bodyStream(), null));
     } else {
       requestBuilder.setEntity(new ByteArrayEntity(new byte[0], null));
     }

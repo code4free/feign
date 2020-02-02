@@ -13,6 +13,7 @@
  */
 package feign;
 
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -190,8 +191,19 @@ public final class Request {
     return body.data;
   }
 
+  /**
+   * If present, this is a stream that will be send to the server. It's not possible to replay it.
+   */
+  public InputStream bodyStream() {
+    return body.dataStream;
+  }
+
   public boolean isBinary() {
     return body.isBinary();
+  }
+
+  public boolean isStream() {
+    return body.isStream();
   }
 
   /**
@@ -378,6 +390,7 @@ public final class Request {
 
     private Charset encoding;
     private byte[] data;
+    private InputStream dataStream;
 
     private Body() {
       super();
@@ -392,6 +405,11 @@ public final class Request {
       this.encoding = encoding;
     }
 
+    private Body(InputStream dataStream, Charset encoding) {
+      this.dataStream = dataStream;
+      this.encoding = encoding;
+    }
+
     public Optional<Charset> getEncoding() {
       return Optional.ofNullable(this.encoding);
     }
@@ -399,6 +417,10 @@ public final class Request {
     public int length() {
       /* calculate the content length based on the data provided */
       return data != null ? data.length : 0;
+    }
+
+    public InputStream asStream() {
+      return dataStream;
     }
 
     public byte[] asBytes() {
@@ -415,6 +437,10 @@ public final class Request {
       return encoding == null || data == null;
     }
 
+    public boolean isStream() {
+      return dataStream != null;
+    }
+
     public static Body create(String data) {
       return new Body(data.getBytes());
     }
@@ -429,6 +455,10 @@ public final class Request {
 
     public static Body create(byte[] data, Charset charset) {
       return new Body(data, charset);
+    }
+
+    public static Body create(InputStream dataStream, Charset charset) {
+      return new Body(dataStream, charset);
     }
 
     /**
@@ -449,6 +479,5 @@ public final class Request {
     public static Body empty() {
       return new Body();
     }
-
   }
 }

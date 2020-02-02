@@ -15,6 +15,8 @@ package feign;
 
 import feign.Request.HttpMethod;
 import feign.template.*;
+
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -800,6 +802,11 @@ public final class RequestTemplate implements Serializable {
    */
   public RequestTemplate body(String bodyText) {
     this.body(Request.Body.create(bodyText.getBytes(this.charset), this.charset));
+    return this;
+  }
+
+  public RequestTemplate body(InputStream inputStream, Charset charset) {
+    body(Request.Body.create(inputStream, charset));
     return this;
   }
 
